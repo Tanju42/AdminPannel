@@ -16,5 +16,6 @@ public class AdminPannel extends JavaPlugin {
     @Override
     public void onDisable() {
         getLogger().info(ChatColor.RED+"Plugin Disabled!");
+
     }
 }
