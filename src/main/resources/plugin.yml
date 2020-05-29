@@ -8,6 +8,4 @@ api-version: 1.15
 commands:
   admingui:
     description: Opens the Admin GUI
-    aliases:
-      - at
     usage: /<command>
