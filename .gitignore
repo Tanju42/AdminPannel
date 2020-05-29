@@ -1,6 +1,7 @@
 # Project exclude paths
-/target/
-/.idea/
-/.gitignore
-/AdminPannel.iml
-/CopyAndStart.cmd
+*.iml
+.idea
+.gradle
+build
+out
+CopyAndStart.cmd
