@@ -1,2 +1,6 @@
 # Project exclude paths
 /target/
+/.idea/
+/.gitignore
+/AdminPannel.iml
+/CopyAndStart.cmd
