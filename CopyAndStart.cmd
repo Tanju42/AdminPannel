@@ -1,3 +1,5 @@
+taskkill /fi "WindowTitle eq CopyAndStart"
+title CopyAndStart
 cd target
 copy /Y %1 C:\IxD\Server\plugins
 cd C:\IxD\Server
