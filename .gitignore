@@ -10,3 +10,4 @@ CopyAndStart.cmd
 /target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst
 /Copy.cmd
 /target/AdminPannel-1.0.jar
+/target/antrun/build-main.xml
