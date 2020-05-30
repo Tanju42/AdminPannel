@@ -1,0 +1,12 @@
+name: AdminTools
+version: 1.0
+authors: [Tanju, Engin, Andreas]
+description: GUI with Tools for Admins
+main: de.ixd.adminpannel.AdminPannel
+api-version: 1.15
+depend:  [SmartInvs]
+
+commands:
+  admingui:
+    description: Opens the Admin GUI
+    usage: §4Command can only be executed as a Player!
