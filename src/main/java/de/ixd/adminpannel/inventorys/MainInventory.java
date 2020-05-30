@@ -30,6 +30,7 @@ public class MainInventory implements InventoryProvider {
     public void init(Player p, InventoryContents contents) {
         contents.add(Wetter());
         contents.add(GameRule());
+        contents.add(Sounds());
     }
 
     public void update(Player p, InventoryContents contents) {
@@ -72,6 +73,22 @@ public class MainInventory implements InventoryProvider {
         ClickableItem ClickItem = ClickableItem.of(item, e -> {
             Player p = (Player) e.getWhoClicked();
             GameRulesInventory.open(p);
+        });
+        return ClickItem;
+    }
+
+    public ClickableItem Sounds() {
+        ItemStack item = new ItemStack(Material.BOOK);
+        ItemMeta itemMeta = item.getItemMeta();
+        itemMeta.setDisplayName(ChatColor.BLUE+"Sounds");
+        ArrayList<String> lore = new ArrayList<>();
+        lore.add(ChatColor.GRAY+"Klicken um die Sounds");
+        lore.add(ChatColor.GRAY+"zu hören!");
+        itemMeta.setLore(lore);
+        item.setItemMeta(itemMeta);
+        ClickableItem ClickItem = ClickableItem.of(item, e -> {
+            Player p = (Player) e.getWhoClicked();
+            SoundsInventory.open(p, 0);
         });
         return ClickItem;
     }
