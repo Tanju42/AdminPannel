@@ -15,9 +15,11 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.ArrayList;
 
 public class MainInventory implements InventoryProvider {
+    public void update(Player p, InventoryContents contents) {}
 
-    private static SmartInventory MainInv = SmartInventory.builder().
-            id("MainInv")
+    private static SmartInventory MainInv = SmartInventory.builder()
+            .id("MainInv")
+            .manager(AdminPannel.SmartInvsMan)
             .provider(new MainInventory())
             .title(ChatColor.RED+"Admin Pannel")
             .size(2,9)
@@ -31,10 +33,6 @@ public class MainInventory implements InventoryProvider {
         contents.add(Wetter());
         contents.add(GameRule());
         contents.add(Sounds());
-    }
-
-    public void update(Player p, InventoryContents contents) {
-
     }
 
     public ClickableItem Wetter() {
@@ -51,7 +49,7 @@ public class MainInventory implements InventoryProvider {
         ClickableItem ClickItem = ClickableItem.of(item, e -> {
             Player p = (Player) e.getWhoClicked();
             if (e.isLeftClick()) {
-                WetterInventory.open(p);
+                WeatherInventory.open(p);
             } else if (e.isRightClick()) {
                 Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "weather clear");
                 p.sendMessage(AdminPannel.prefix+ChatColor.YELLOW+"Wetter wurde auf "+ChatColor.GREEN+"clear"+ChatColor.YELLOW+" gestellt!");

@@ -4,7 +4,8 @@ authors: [Tanju, Engin, Andreas]
 description: GUI with Tools for Admins
 main: de.ixd.adminpannel.AdminPannel
 api-version: 1.15
-depend:  [SmartInvs]
+depend:
+  - SmartInvs
 
 commands:
   admingui:

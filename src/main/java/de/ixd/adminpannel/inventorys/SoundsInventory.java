@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 
 public class SoundsInventory implements InventoryProvider {
+    public void update(Player p, InventoryContents contents) {}
 
     private static ArrayList<Sound> PlayingSounds = new ArrayList<Sound>();
     private static Pagination pagination = null;
@@ -70,7 +71,6 @@ public class SoundsInventory implements InventoryProvider {
         pagination = contents.pagination();
 
         contents.fillRow(5, ClickableItem.empty(Nix));
-        contents.set(5, 0, Volume2(p, pagination.getPage()));
         contents.set(5, 1, Volume(p, pagination.getPage()));
         contents.set(5, 2, Stop(p, pagination.getPage()));
 
@@ -89,13 +89,14 @@ public class SoundsInventory implements InventoryProvider {
                 if (e.isLeftClick()) {
                     open(p, pagination.next().getPage());
                 } else if (e.isRightClick()) {
-                    open(p, (pagination.last().getPage()-1));
+                    pagination.last();
+                    pagination.previous();
+                    open(p, (pagination.getPage()));
                 }
             }));
         }
         contents.set(5, 6, Reset(p, pagination.getPage()));
         contents.set(5, 7, Pitch(p, pagination.getPage()));
-        contents.set(5, 8, Pitch2(p, pagination.getPage()));
 
         ClickableItem[] items = new ClickableItem[Sound.values().length];
 
@@ -123,22 +124,24 @@ public class SoundsInventory implements InventoryProvider {
         pagination.addToIterator(contents.newIterator(SlotIterator.Type.HORIZONTAL, 0, 0));
     }
 
-    public void update(Player p, InventoryContents contents) {
-
-    }
-
     public ClickableItem Back() {
         ItemStack item = new ItemStack(Material.IRON_DOOR);
         ItemMeta itemMeta = item.getItemMeta();
         itemMeta.setDisplayName(ChatColor.DARK_PURPLE+"Zurück");
         ArrayList<String> lore = new ArrayList<>();
-        lore.add(ChatColor.GRAY+"Klicken um Zurück");
-        lore.add(ChatColor.GRAY+"zu kommen!");
+        lore.add(ChatColor.GOLD+"Links Klick"+ChatColor.GRAY+":");
+        lore.add(ChatColor.GRAY+"╰» "+ChatColor.BLUE+"Zurück");
+        lore.add(ChatColor.GOLD+"Rechts Klick"+ChatColor.GRAY+":");
+        lore.add(ChatColor.GRAY+"╰» "+ChatColor.BLUE+"Schließen");
         itemMeta.setLore(lore);
         item.setItemMeta(itemMeta);
         ClickableItem ClickItem = ClickableItem.of(item, e -> {
             Player p = (Player) e.getWhoClicked();
-            MainInventory.open(p);
+            if (e.isLeftClick()) {
+                MainInventory.open(p);
+            } else if (e.isRightClick()) {
+                SoundsInv.close(p);
+            }
         });
         return ClickItem;
     }
@@ -185,46 +188,39 @@ public class SoundsInventory implements InventoryProvider {
         ArrayList<String> lore = new ArrayList<>();
         lore.add(ChatColor.YELLOW+"Current"+ChatColor.GRAY+": "+ChatColor.GOLD+volume);
         lore.add(ChatColor.GOLD+"Links Klick"+ChatColor.GRAY+": "+ChatColor.BLUE+"+ 1");
+        lore.add(ChatColor.GOLD+"Shift Links Klick"+ChatColor.GRAY+": "+ChatColor.BLUE+"+ 0.1");
         lore.add(ChatColor.GOLD+"Rechts Klick"+ChatColor.GRAY+": "+ChatColor.BLUE+"- 1");
+        lore.add(ChatColor.GOLD+"Shift Rechts Klick"+ChatColor.GRAY+": "+ChatColor.BLUE+"- 0.1");
         itemMeta.setLore(lore);
         item.setItemMeta(itemMeta);
         ClickableItem ClickItem = ClickableItem.of(item, e -> {
-            if (e.isLeftClick()) {
-                if (volume < 99) {
-                    volume = volume + 1;
+            if (e.isShiftClick()) {
+                if (e.isLeftClick()) {
+                    if (volume < 99.9) {
+                        volume = volume * 100;
+                        volume = volume + 10;
+                        volume = volume / 100;
+                    }
+                } else if (e.isRightClick()) {
+                    if (volume > 0.1) {
+                        volume = volume * 100;
+                        volume = volume - 10;
+                        volume = volume / 100;
+                    }
                 }
+            } else {
+                if (e.isLeftClick()) {
+                    if (volume < 99) {
+                        volume = volume + 1;
+                    }
 
-            } else if (e.isRightClick()) {
-                if (volume > 1) {
-                    volume = volume - 1;
+                } else if (e.isRightClick()) {
+                    if (volume > 1) {
+                        volume = volume - 1;
+                    }
                 }
             }
-            SoundsInv.open(p, Page);
-        });
-        return ClickItem;
-    }
-
-    public ClickableItem Volume2(Player p, Integer Page) {
-        ItemStack item = new ItemStack(Material.POPPED_CHORUS_FRUIT);
-        ItemMeta itemMeta = item.getItemMeta();
-        itemMeta.setDisplayName(ChatColor.GREEN+"Lautstärke");
-        ArrayList<String> lore = new ArrayList<>();
-        lore.add(ChatColor.YELLOW+"Current"+ChatColor.GRAY+": "+ChatColor.GOLD+volume);
-        lore.add(ChatColor.GOLD+"Links Klick"+ChatColor.GRAY+": "+ChatColor.BLUE+"+ 0.1");
-        lore.add(ChatColor.GOLD+"Rechts Klick"+ChatColor.GRAY+": "+ChatColor.BLUE+"- 0.1");
-        itemMeta.setLore(lore);
-        item.setItemMeta(itemMeta);
-        ClickableItem ClickItem = ClickableItem.of(item, e -> {
-            if (e.isLeftClick()) {
-                if (volume < 99.9) {
-                    volume = volume + 0.1;
-                }
-
-            } else if (e.isRightClick()) {
-                if (volume > 0.1) {
-                    volume = volume - 0.1;
-                }
-            }
+            volume = Double.parseDouble(String.valueOf(volume).substring(0, 3));
             SoundsInv.open(p, Page);
         });
         return ClickItem;
@@ -237,44 +233,35 @@ public class SoundsInventory implements InventoryProvider {
         ArrayList<String> lore = new ArrayList<>();
         lore.add(ChatColor.YELLOW+"Current"+ChatColor.GRAY+": "+ChatColor.GOLD+pitch);
         lore.add(ChatColor.GOLD+"Links Klick"+ChatColor.GRAY+": "+ChatColor.BLUE+"+ 1");
+        lore.add(ChatColor.GOLD+"Shift Links Klick"+ChatColor.GRAY+": "+ChatColor.BLUE+"+ 0.1");
         lore.add(ChatColor.GOLD+"Rechts Klick"+ChatColor.GRAY+": "+ChatColor.BLUE+"- 1");
+        lore.add(ChatColor.GOLD+"Shift Rechts Klick"+ChatColor.GRAY+": "+ChatColor.BLUE+"- 0.1");
         itemMeta.setLore(lore);
         item.setItemMeta(itemMeta);
         ClickableItem ClickItem = ClickableItem.of(item, e -> {
-            if (e.isLeftClick()) {
-                if (pitch < 99) {
-                    pitch = pitch + 1;
+            if (e.isShiftClick()) {
+                if (e.isLeftClick()) {
+                    if (pitch < 99.9) {
+                        pitch = pitch + 0.1;
+                    }
+                } else if (e.isRightClick()) {
+                    if (pitch > 0.1) {
+                        pitch = pitch - 0.1;
+                    }
                 }
-            } else if (e.isRightClick()) {
-                if (pitch > 1) {
-                    pitch = pitch - 1;
-                }
-            }
-            SoundsInv.open(p, Page);
-        });
-        return ClickItem;
-    }
+            } else {
+                if (e.isLeftClick()) {
+                    if (pitch < 99) {
+                        pitch = pitch + 1;
+                    }
 
-    public ClickableItem Pitch2(Player p, Integer Page) {
-        ItemStack item = new ItemStack(Material.POPPED_CHORUS_FRUIT);
-        ItemMeta itemMeta = item.getItemMeta();
-        itemMeta.setDisplayName(ChatColor.GREEN+"Pitch");
-        ArrayList<String> lore = new ArrayList<>();
-        lore.add(ChatColor.YELLOW+"Current"+ChatColor.GRAY+": "+ChatColor.GOLD+pitch);
-        lore.add(ChatColor.GOLD+"Links Klick"+ChatColor.GRAY+": "+ChatColor.BLUE+"+ 0.1");
-        lore.add(ChatColor.GOLD+"Rechts Klick"+ChatColor.GRAY+": "+ChatColor.BLUE+"- 0.1");
-        itemMeta.setLore(lore);
-        item.setItemMeta(itemMeta);
-        ClickableItem ClickItem = ClickableItem.of(item, e -> {
-            if (e.isLeftClick()) {
-                if (pitch < 99.9) {
-                    pitch = Math.round((pitch + 0.1)*100)/100;
-                }
-            } else if (e.isRightClick()) {
-                if (pitch > 0.1) {
-                    pitch = Math.round((pitch - 0.1)*100)/100;
+                } else if (e.isRightClick()) {
+                    if (pitch > 1) {
+                        pitch = pitch - 1;
+                    }
                 }
             }
+            pitch = Double.parseDouble(String.valueOf(pitch).substring(0, 3));
             SoundsInv.open(p, Page);
         });
         return ClickItem;

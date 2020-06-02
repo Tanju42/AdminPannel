@@ -1,5 +1,6 @@
 package de.ixd.adminpannel;
 
+import fr.minuskube.inv.InventoryManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameRule;
@@ -18,6 +19,7 @@ import java.util.logging.Level;
 
 
 public class AdminPannel extends JavaPlugin {
+    public static InventoryManager SmartInvsMan;
 
     private static ArrayList<String> configs = new ArrayList<String>();
     public static AdminPannel plugin;
@@ -26,8 +28,11 @@ public class AdminPannel extends JavaPlugin {
     @Override
     public void onEnable() {
         plugin = this;
+        SmartInvsMan = new InventoryManager(plugin);
+        SmartInvsMan.init();
         plugin.saveDefaultConfig();
         plugin.getCommand("admingui").setExecutor(new Commands());
+        plugin.getCommand("admingui").setTabCompleter(new CommandTabComplete());
         createLanguageFiles();
         loadConfigs();
         getLogger().info(ChatColor.GREEN+"Plugin Enabled!");

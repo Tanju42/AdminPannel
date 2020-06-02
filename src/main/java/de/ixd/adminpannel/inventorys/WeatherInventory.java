@@ -14,33 +14,32 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 
-public class WetterInventory implements InventoryProvider {
+public class WeatherInventory implements InventoryProvider {
+    public void update(Player p, InventoryContents contents) {}
 
-    private static SmartInventory WetterInv = SmartInventory.builder().
+    private static SmartInventory WeatherInv = SmartInventory.builder().
             id("WetterInv")
-            .provider(new WetterInventory())
+            .provider(new WeatherInventory())
             .title(ChatColor.GOLD+"Wetter")
-            .size(1,9)
+            .size(2,9)
             .build();
 
     public static void open(Player p) {
-        WetterInv.open(p);
+        WeatherInv.open(p);
     }
 
     public void init(Player p, InventoryContents contents) {
         ItemStack Nix = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         ItemMeta NixMeta = Nix.getItemMeta();
-        NixMeta.setDisplayName("");
+        NixMeta.setDisplayName(" ");
         Nix.setItemMeta(NixMeta);
+        //##################################################
         contents.fill(ClickableItem.empty(Nix));
-        contents.set(0, 3, Arten("clear"));
-        contents.set(0, 4, Arten("rain"));
-        contents.set(0, 5, Arten("thunder"));
-        contents.set(0, 8, Back());
-
-    }
-
-    public void update(Player p, InventoryContents contents) {
+        contents.set(0, 3, Types("clear"));
+        contents.set(0, 4, Types("rain"));
+        contents.set(0, 5, Types("thunder"));
+        contents.set(1, 2, World(p));
+        contents.set(1, 4, Back());
 
     }
 
@@ -49,32 +48,49 @@ public class WetterInventory implements InventoryProvider {
         ItemMeta itemMeta = item.getItemMeta();
         itemMeta.setDisplayName(ChatColor.DARK_PURPLE+"Zurück");
         ArrayList<String> lore = new ArrayList<>();
-        lore.add(ChatColor.GRAY+"Klicken um Zurück");
-        lore.add(ChatColor.GRAY+"zu kommen!");
+        lore.add(ChatColor.GOLD+"Links Klick"+ChatColor.GRAY+":");
+        lore.add(ChatColor.GRAY+"╰» "+ChatColor.BLUE+"Zurück");
+        lore.add(ChatColor.GOLD+"Rechts Klick"+ChatColor.GRAY+":");
+        lore.add(ChatColor.GRAY+"╰» "+ChatColor.BLUE+"Schließen");
         itemMeta.setLore(lore);
         item.setItemMeta(itemMeta);
         ClickableItem ClickItem = ClickableItem.of(item, e -> {
             Player p = (Player) e.getWhoClicked();
-            MainInventory.open(p);
+            if (e.isLeftClick()) {
+                MainInventory.open(p);
+            } else if (e.isRightClick()) {
+                WeatherInv.close(p);
+            }
         });
         return ClickItem;
     }
 
-    public ClickableItem Arten(String Art) {
+    public ClickableItem Types(String Art) {
         ItemStack item = new ItemStack(Material.PAPER);
         ItemMeta itemMeta = item.getItemMeta();
-        itemMeta.setDisplayName(ChatColor.GREEN+Art);
+        itemMeta.setDisplayName(ChatColor.BLUE+Art);
         ArrayList<String> lore = new ArrayList<>();
         lore.add(ChatColor.GRAY+"Klicken um das Wetter auf");
-        lore.add(ChatColor.GREEN+Art+ChatColor.GRAY+" zu stellen!");
+        lore.add(ChatColor.BLUE+Art+ChatColor.GRAY+" zu stellen!");
         itemMeta.setLore(lore);
         item.setItemMeta(itemMeta);
         ClickableItem ClickItem = ClickableItem.of(item, e -> {
-            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "weather "+Art);
             Player p = (Player) e.getWhoClicked();
+            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "weather "+Art);
             p.sendMessage(AdminPannel.prefix+ChatColor.YELLOW+"Wetter wurde auf "+ChatColor.GREEN+Art+ChatColor.YELLOW+" gestellt!");
-            p.closeInventory();
         });
+        return ClickItem;
+    }
+
+    public ClickableItem World(Player p) {
+        ItemStack item = new ItemStack(Material.BOOK);
+        ItemMeta itemMeta = item.getItemMeta();
+        itemMeta.setDisplayName(ChatColor.BLUE+"Momentane Welt");
+        ArrayList<String> lore = new ArrayList<>();
+        lore.add(ChatColor.GRAY+p.getWorld().getName());
+        itemMeta.setLore(lore);
+        item.setItemMeta(itemMeta);
+        ClickableItem ClickItem = ClickableItem.empty(item);
         return ClickItem;
     }
 }

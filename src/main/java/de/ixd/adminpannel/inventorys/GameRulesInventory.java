@@ -1,14 +1,11 @@
 package de.ixd.adminpannel.inventorys;
 
-import com.sun.org.glassfish.gmbal.Description;
 import de.ixd.adminpannel.AdminPannel;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
-import fr.minuskube.inv.content.SlotPos;
 import net.wesjd.anvilgui.AnvilGUI;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameRule;
 import org.bukkit.Material;
@@ -21,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class GameRulesInventory implements InventoryProvider {
+    public void update(Player p, InventoryContents contents) {}
 
     private static HashMap<GameRule, ArrayList<String>> Descriptions = new HashMap<GameRule, ArrayList<String>>();
     private static SmartInventory GameRulesInv = SmartInventory.builder().
@@ -48,10 +46,6 @@ public class GameRulesInventory implements InventoryProvider {
         contents.set(4, 4, Back());
         contents.set(4, 2, World(p));
         contents.set(4, 6, Reset(p));
-
-    }
-
-    public void update(Player p, InventoryContents contents) {
 
     }
 

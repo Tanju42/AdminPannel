@@ -2,6 +2,11 @@
 <project version="4">
   <component name="RemoteRepositoriesConfiguration">
     <remote-repository>
+      <option name="id" value="LegendOnline" />
+      <option name="name" value="LegendOnline" />
+      <option name="url" value="https://raw.githubusercontent.com/LegendOnline/InventoryAPI/mvn-repo/" />
+    </remote-repository>
+    <remote-repository>
       <option name="id" value="spigot-repo" />
       <option name="name" value="spigot-repo" />
       <option name="url" value="https://hub.spigotmc.org/nexus/content/repositories/snapshots/" />
@@ -20,6 +25,11 @@
       <option name="id" value="jitpack.io" />
       <option name="name" value="jitpack.io" />
       <option name="url" value="https://jitpack.io" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="sytm-nexus" />
+      <option name="name" value="sytm-nexus" />
+      <option name="url" value="https://repo.sytm.de/repository/maven-hosted/" />
     </remote-repository>
     <remote-repository>
       <option name="id" value="jboss.community" />
