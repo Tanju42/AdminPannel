@@ -6,6 +6,7 @@ import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.wesjd.anvilgui.AnvilGUI;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameRule;
 import org.bukkit.Material;
@@ -54,13 +55,19 @@ public class GameRulesInventory implements InventoryProvider {
         ItemMeta itemMeta = item.getItemMeta();
         itemMeta.setDisplayName(ChatColor.DARK_PURPLE+"Zurück");
         ArrayList<String> lore = new ArrayList<>();
-        lore.add(ChatColor.GRAY+"Klicken um Zurück");
-        lore.add(ChatColor.GRAY+"zu kommen!");
+        lore.add(ChatColor.GOLD+"Links Klick"+ChatColor.GRAY+":");
+        lore.add(ChatColor.GRAY+"╰» "+ChatColor.BLUE+"Zurück");
+        lore.add(ChatColor.GOLD+"Rechts Klick"+ChatColor.GRAY+":");
+        lore.add(ChatColor.GRAY+"╰» "+ChatColor.BLUE+"Schließen");
         itemMeta.setLore(lore);
         item.setItemMeta(itemMeta);
         ClickableItem ClickItem = ClickableItem.of(item, e -> {
             Player p = (Player) e.getWhoClicked();
-            MainInventory.open(p);
+            if (e.isLeftClick()) {
+                MainInventory.open(p);
+            } else if (e.isRightClick()) {
+                GameRulesInv.close(p);
+            }
         });
         return ClickItem;
     }
@@ -133,9 +140,12 @@ public class GameRulesInventory implements InventoryProvider {
                 }
                 open(p);
             } else { // Integer
+                GameRulesInv.close(p);
                 new AnvilGUI.Builder()
                         .onClose(player -> {
-                            open(p);
+                            Bukkit.getScheduler().runTask(AdminPannel.plugin, () -> {
+                                GameRulesInv.open(player);
+                            });
                         })
                         .onComplete((player, text) -> {
                             Integer value = 1;
@@ -179,7 +189,5 @@ public class GameRulesInventory implements InventoryProvider {
         for ( String rule : language.getConfigurationSection("inventory.gamerules.description").getKeys(false)) {
             Descriptions.put(GameRule.getByName(rule), (ArrayList<String>) language.getList("inventory.gamerules.description."+rule));
         }
-        AdminPannel.plugin.getLogger().info("Descriptions: "+Descriptions.toString());
-        AdminPannel.plugin.getLogger().info("Keys: "+language.getConfigurationSection("inventory.gamerules.description").getKeys(false));
     }
 }

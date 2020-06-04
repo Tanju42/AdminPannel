@@ -47,18 +47,23 @@ public class SoundsInventory implements InventoryProvider {
     }
 
     public void init(Player p, InventoryContents contents) {
+        if (pagination == null) {
+            pagination = contents.pagination();
+        }
+        Integer currPage = pagination.getPage();
+        //##################################################
         ItemStack Nix = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         ItemMeta NixMeta = Nix.getItemMeta();
         NixMeta.setDisplayName(" ");
         Nix.setItemMeta(NixMeta);
         //##################################################
-        ItemStack Back = new ItemStack(Material.ARROW);
-        ItemMeta BackMeta = Nix.getItemMeta();
-        BackMeta.setDisplayName(ChatColor.DARK_AQUA+"Back");
+        ItemStack Previous = new ItemStack(Material.ARROW);
+        ItemMeta PreviousMeta = Nix.getItemMeta();
+        PreviousMeta.setDisplayName(ChatColor.DARK_AQUA+"Previous");
         ArrayList<String> Backlore = new ArrayList<>();
         Backlore.add(ChatColor.GOLD+"Rechts Klick"+ChatColor.GRAY+": "+ChatColor.DARK_AQUA+"First");
-        BackMeta.setLore(Backlore);
-        Back.setItemMeta(BackMeta);
+        PreviousMeta.setLore(Backlore);
+        Previous.setItemMeta(PreviousMeta);
         //##################################################
         ItemStack Next = new ItemStack(Material.ARROW);
         ItemMeta NextMeta = Nix.getItemMeta();
@@ -68,16 +73,24 @@ public class SoundsInventory implements InventoryProvider {
         NextMeta.setLore(Nextlore);
         Next.setItemMeta(NextMeta);
         //##################################################
-        pagination = contents.pagination();
-
         contents.fillRow(5, ClickableItem.empty(Nix));
         contents.set(5, 1, Volume(p, pagination.getPage()));
         contents.set(5, 2, Stop(p, pagination.getPage()));
 
         if (pagination.getPage() != 0) {
-            contents.set(5, 3, ClickableItem.of(Back, e -> {
+            contents.set(5, 3, ClickableItem.of(Previous, e -> {
                 if (e.isLeftClick()) {
                     open(p, pagination.previous().getPage());
+                } else if (e.isRightClick()) {
+                    open(p, pagination.first().getPage());
+                }
+            }));
+        } else {
+            contents.set(5, 3, ClickableItem.of(Previous, e -> {
+                if (e.isLeftClick()) {
+                    pagination.last();
+                    pagination.previous();
+                    open(p, (pagination.getPage()));
                 } else if (e.isRightClick()) {
                     open(p, pagination.first().getPage());
                 }
@@ -94,7 +107,18 @@ public class SoundsInventory implements InventoryProvider {
                     open(p, (pagination.getPage()));
                 }
             }));
+        } else {
+            contents.set(5, 5, ClickableItem.of(Next, e -> {
+                if (e.isLeftClick()) {
+                    open(p, pagination.first().getPage());
+                } else if (e.isRightClick()) {
+                    pagination.last();
+                    pagination.previous();
+                    open(p, (pagination.getPage()));
+                }
+            }));
         }
+        //##################################################
         contents.set(5, 6, Reset(p, pagination.getPage()));
         contents.set(5, 7, Pitch(p, pagination.getPage()));
 
@@ -122,6 +146,14 @@ public class SoundsInventory implements InventoryProvider {
         pagination.setItems(items);
         pagination.setItemsPerPage(45);
         pagination.addToIterator(contents.newIterator(SlotIterator.Type.HORIZONTAL, 0, 0));
+
+
+        pagination.first();
+        if (currPage != 0) {
+            for(int i = 0; i != currPage; i++) {
+                pagination.next();
+            }
+        }
     }
 
     public ClickableItem Back() {

@@ -33,6 +33,7 @@ public class MainInventory implements InventoryProvider {
         contents.add(Wetter());
         contents.add(GameRule());
         contents.add(Sounds());
+        contents.add(Whitelist());
     }
 
     public ClickableItem Wetter() {
@@ -71,6 +72,22 @@ public class MainInventory implements InventoryProvider {
         ClickableItem ClickItem = ClickableItem.of(item, e -> {
             Player p = (Player) e.getWhoClicked();
             GameRulesInventory.open(p);
+        });
+        return ClickItem;
+    }
+
+    public ClickableItem Whitelist() {
+        ItemStack item = new ItemStack(Material.BOOK);
+        ItemMeta itemMeta = item.getItemMeta();
+        itemMeta.setDisplayName(ChatColor.BLUE+"Whitelist");
+        ArrayList<String> lore = new ArrayList<>();
+        lore.add(ChatColor.GRAY+"Klicken um die Whitelist");
+        lore.add(ChatColor.GRAY+"zu bearbeiten!");
+        itemMeta.setLore(lore);
+        item.setItemMeta(itemMeta);
+        ClickableItem ClickItem = ClickableItem.of(item, e -> {
+            Player p = (Player) e.getWhoClicked();
+            WhitelistInventory.open(p, 0);
         });
         return ClickItem;
     }
