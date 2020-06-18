@@ -34,6 +34,7 @@ public class MainInventory implements InventoryProvider {
         contents.add(GameRule());
         contents.add(Sounds());
         contents.add(Whitelist());
+        contents.add(Effects());
     }
 
     public ClickableItem Wetter() {
@@ -104,6 +105,22 @@ public class MainInventory implements InventoryProvider {
         ClickableItem ClickItem = ClickableItem.of(item, e -> {
             Player p = (Player) e.getWhoClicked();
             SoundsInventory.open(p, 0);
+        });
+        return ClickItem;
+    }
+
+    public ClickableItem Effects() {
+        ItemStack item = new ItemStack(Material.BOOK);
+        ItemMeta itemMeta = item.getItemMeta();
+        itemMeta.setDisplayName(ChatColor.BLUE+"Effects");
+        ArrayList<String> lore = new ArrayList<>();
+        lore.add(ChatColor.GRAY+"Klicken um dir Effects");
+        lore.add(ChatColor.GRAY+"zu geben!");
+        itemMeta.setLore(lore);
+        item.setItemMeta(itemMeta);
+        ClickableItem ClickItem = ClickableItem.of(item, e -> {
+            Player p = (Player) e.getWhoClicked();
+            EffectsInventory.open(p);
         });
         return ClickItem;
     }
