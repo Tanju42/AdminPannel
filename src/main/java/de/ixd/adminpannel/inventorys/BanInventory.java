@@ -3,20 +3,26 @@ package de.ixd.adminpannel.inventorys;
 import de.ixd.adminpannel.AdminPannel;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
-import fr.minuskube.inv.content.*;
+import fr.minuskube.inv.content.InventoryContents;
+import fr.minuskube.inv.content.InventoryProvider;
+import fr.minuskube.inv.content.Pagination;
+import fr.minuskube.inv.content.SlotIterator;
 import net.wesjd.anvilgui.AnvilGUI;
-import org.bukkit.*;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.enchantments.Enchantment;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
-public class WhitelistInventory  implements InventoryProvider {
+public class BanInventory implements InventoryProvider {
     public void update(Player p, InventoryContents contents) {}
 
 
@@ -24,17 +30,17 @@ public class WhitelistInventory  implements InventoryProvider {
     private static Integer rows = 2;
     private static Integer TempPage = 0;
 
-    private static SmartInventory WhitelistInv = SmartInventory.builder().
-            id("WhitelistInv")
-            .provider(new WhitelistInventory())
-            .title(ChatColor.GOLD+"Whitelist "+ChatColor.GRAY+"|"+ChatColor.AQUA+" 0")
+    private static SmartInventory BanInv = SmartInventory.builder().
+            id("BanInv")
+            .provider(new BanInventory())
+            .title(ChatColor.GOLD+"Ban "+ChatColor.GRAY+"|"+ChatColor.AQUA+" 0")
             .size(rows,9)
             .build();
 
     public static void open(Player p, Integer Page) {
         rows = 2;
         System.out.println("HIER  asd");
-        for (int tempRows = 9; tempRows < Bukkit.getWhitelistedPlayers().size(); tempRows = tempRows + 9) {
+        for (int tempRows = 9; tempRows < Bukkit.getBannedPlayers().size(); tempRows = tempRows + 9) {
             System.out.println("HIER "+tempRows);
             rows++;
             if (tempRows == 54) {
@@ -60,13 +66,13 @@ public class WhitelistInventory  implements InventoryProvider {
                 rows = rows - 5;
             }
         }
-        WhitelistInv = SmartInventory.builder().
-                id("WhitelistInv")
-                .provider(new WhitelistInventory())
-                .title(ChatColor.GOLD+"Whitelist "+ChatColor.GRAY+"| "+ChatColor.AQUA+TempPage)
+        BanInv = SmartInventory.builder().
+                id("BanInv")
+                .provider(new BanInventory())
+                .title(ChatColor.GOLD+"Ban "+ChatColor.GRAY+"| "+ChatColor.AQUA+TempPage)
                 .size(rows,9)
                 .build();
-        WhitelistInv.open(p, TempPage);
+        BanInv.open(p, TempPage);
     }
 
     public void init(Player p, InventoryContents contents) {
@@ -98,19 +104,19 @@ public class WhitelistInventory  implements InventoryProvider {
         NextMeta.setLore(Nextlore);
         Next.setItemMeta(NextMeta);
         //##################################################
-        HashMap<String, OfflinePlayer> WhitelistedHashMap = new HashMap<>();
+        HashMap<String, OfflinePlayer> BannedHashMap = new HashMap<>();
         // <Name, OfflinePlayer>
-        for (OfflinePlayer Op : Bukkit.getWhitelistedPlayers()) {
-            WhitelistedHashMap.put(Op.getName(), Op);
+        for (OfflinePlayer Op : Bukkit.getBannedPlayers()) {
+            BannedHashMap.put(Op.getName(), Op);
         }
-        ArrayList<String> WhitelistedPlayers = new ArrayList<>(WhitelistedHashMap.keySet());
-        Collections.sort(WhitelistedPlayers);
+        ArrayList<String> BannedPlayers = new ArrayList<>(BannedHashMap.keySet());
+        Collections.sort(BannedPlayers);
 
 
-        ClickableItem[] items = new ClickableItem[WhitelistedPlayers.size()];
+        ClickableItem[] items = new ClickableItem[BannedPlayers.size()];
 
         for(int i = 0; i < items.length; i++) {
-            items[i] = TempSkullRemove(WhitelistedHashMap.get(WhitelistedPlayers.get(i)));
+            items[i] = TempSkullRemove(BannedHashMap.get(BannedPlayers.get(i)));
         }
 
         pagination.setItems(items);
@@ -120,23 +126,21 @@ public class WhitelistInventory  implements InventoryProvider {
         ArrayList<OfflinePlayer> PlayersOnPage = new ArrayList<>();
         Integer from = (pagination.getPage() * 45);
         Integer to = ((pagination.getPage()+1) * 45);
-        if (WhitelistedPlayers.size() < to) {
-            to = WhitelistedPlayers.size();
+        if (BannedPlayers.size() < to) {
+            to = BannedPlayers.size();
         }
-        List<String> PlayerNamesOnPage = WhitelistedPlayers.subList(from, to);
+        List<String> PlayerNamesOnPage = BannedPlayers.subList(from, to);
         for (String Name : PlayerNamesOnPage) {
-            PlayersOnPage.add(WhitelistedHashMap.get(Name));
+            PlayersOnPage.add(BannedHashMap.get(Name));
         }
 
         UpdateSkins(PlayersOnPage, contents, p);
 
         //##################################################
         contents.fillRow(rows-1, ClickableItem.empty(Nix));
-        contents.set(rows-1, 0, WhitelistStatus());
-        contents.set(rows-1, 1, Reload());
+        contents.set(rows-1, 1, AddItem());
         contents.set(rows-1, 4, Back());
-        contents.set(rows-1, 7, AddItem());
-        contents.set(rows-1, 8, RemoveItem());
+        contents.set(rows-1, 7, RemoveItem());
         //##################################################
         page(contents, Previous, Next, p, currPage);
     }
@@ -144,7 +148,7 @@ public class WhitelistInventory  implements InventoryProvider {
     private ClickableItem AddItem() {
         ItemStack item = new ItemStack(Material.PAPER);
         ItemMeta itemMeta = item.getItemMeta();
-        itemMeta.setDisplayName(ChatColor.GREEN+"Hinzufügen");
+        itemMeta.setDisplayName(ChatColor.GREEN+"Bannen");
         itemMeta.setCustomModelData(9901802);
         ArrayList<String> lore = new ArrayList<>();
         lore.add(ChatColor.GOLD+"Links Klick"+ChatColor.GRAY+":");
@@ -159,19 +163,19 @@ public class WhitelistInventory  implements InventoryProvider {
                 SmartInventory addHeadInv = SmartInventory.builder()
                         .manager(AdminPannel.SmartInvsMan)
                         .size(2, 9)
-                        .title(ChatColor.GOLD+"Whitelist "+ChatColor.GRAY+"|"+ChatColor.GREEN+" Hinzufügen")
+                        .title(ChatColor.GOLD+"Ban "+ChatColor.GRAY+"|"+ChatColor.GREEN+" Ban")
                         .provider(new InventoryProvider() {
                                       @Override
                                       public void init(Player player, InventoryContents contents) {
                                           //########################
                                           ArrayList < String > lore1 = new ArrayList<>();
                                           lore1.add(ChatColor.GOLD+"Links Klick"+ChatColor.GRAY+":");
-                                          lore1.add(ChatColor.GRAY+"╰» "+ChatColor.BLUE+"Hinzufügen");
+                                          lore1.add(ChatColor.GRAY+"╰» "+ChatColor.BLUE+"Ban");
                                           contents.add(ClickableItem.of(getSkull(p, ChatColor.GREEN+p.getName(), lore1), e1 -> {
                                               SmartInventory addConfirm = SmartInventory.builder()
                                                       .manager(AdminPannel.SmartInvsMan)
                                                       .size(1, 9)
-                                                      .title(ChatColor.GREEN+"Hinzufügen "+ChatColor.GRAY+"| "+ChatColor.AQUA+p.getName())
+                                                      .title(ChatColor.GREEN+"Ban "+ChatColor.GRAY+"| "+ChatColor.AQUA+p.getName())
                                                       .provider((p1, inventoryContents) -> {
                                                           ItemStack Nix = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
                                                           ItemMeta NixMeta = Nix.getItemMeta();
@@ -185,15 +189,15 @@ public class WhitelistInventory  implements InventoryProvider {
                                                           ConfirmMeta.setCustomModelData(9901804);
                                                           Confirm.setItemMeta(ConfirmMeta);
                                                           inventoryContents.set(0, 2, ClickableItem.of(Confirm, e2 -> {
-                                                              Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "whitelist add "+e2.getWhoClicked().getName());
+                                                              Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "ban "+e2.getWhoClicked().getName());
                                                               Bukkit.reloadWhitelist();
-                                                              p.sendMessage(AdminPannel.prefix+ChatColor.YELLOW+"Spieler "+ChatColor.AQUA+e2.getWhoClicked().getName()+ChatColor.YELLOW+" wurde zur Whitelist hinzugefügt!");
-                                                              WhitelistInv.open((Player) e2.getWhoClicked());
+                                                              p.sendMessage(AdminPannel.prefix+ChatColor.YELLOW+"Spieler "+ChatColor.AQUA+e2.getWhoClicked().getName()+ChatColor.YELLOW+" wurde gebannt!");
+                                                              BanInv.open((Player) e2.getWhoClicked());
                                                           }));
                                                           //####
                                                           ArrayList<String> lore2 = new ArrayList<>();
                                                           lore2.add(ChatColor.GOLD+"Wirklich den Spieler");
-                                                          lore2.add(ChatColor.AQUA+p.getName()+ChatColor.GREEN+" hinzufügen"+ChatColor.GOLD+"?");
+                                                          lore2.add(ChatColor.AQUA+p.getName()+ChatColor.GREEN+" Bannen"+ChatColor.GOLD+"?");
                                                           inventoryContents.set(0, 4, ClickableItem.empty(getSkull(p, ChatColor.AQUA+p.getName(), lore2)));
                                                           //####
                                                           ItemStack Cancel = new ItemStack(Material.PAPER);
@@ -202,10 +206,8 @@ public class WhitelistInventory  implements InventoryProvider {
                                                           CancelMeta.setCustomModelData(9901805);
                                                           Cancel.setItemMeta(CancelMeta);
                                                           inventoryContents.set(0, 6, ClickableItem.of(Cancel, e2 -> {
-                                                              WhitelistInv.open((Player) e2.getWhoClicked());
+                                                              BanInv.open((Player) e2.getWhoClicked());
                                                           }));
-                                                          //####
-
                                                       })
                                                       .build();
                                               addConfirm.open(p);
@@ -225,7 +227,7 @@ public class WhitelistInventory  implements InventoryProvider {
                                           //####
                                           contents.set(1, 4, ClickableItem.of(item1, e1 -> {
                                               Player p1 = (Player) e1.getWhoClicked();
-                                              WhitelistInv.open(p1);
+                                              BanInv.open(p1);
                                           }));
                                       }
                         })
@@ -237,7 +239,7 @@ public class WhitelistInventory  implements InventoryProvider {
                             if (!click) {
                                 anvilp.closeInventory();
                                 Bukkit.getScheduler().runTask(AdminPannel.plugin, () -> {
-                                    WhitelistInv.open(anvilp);
+                                    BanInv.open(anvilp);
                                 });
                             }
                             click = false;
@@ -264,7 +266,7 @@ public class WhitelistInventory  implements InventoryProvider {
     private ClickableItem RemoveItem() {
         ItemStack item = new ItemStack(Material.PAPER);
         ItemMeta itemMeta = item.getItemMeta();
-        itemMeta.setDisplayName(ChatColor.RED+"Entfernen");
+        itemMeta.setDisplayName(ChatColor.RED+"Entbannen");
         itemMeta.setCustomModelData(9901803);
         ArrayList<String> lore = new ArrayList<>();
         lore.add(ChatColor.GOLD+"Rechts Klick"+ChatColor.GRAY+":");
@@ -279,7 +281,7 @@ public class WhitelistInventory  implements InventoryProvider {
                             if (!click) {
                                 anvilp.closeInventory();
                                 Bukkit.getScheduler().runTask(AdminPannel.plugin, () -> {
-                                    WhitelistInv.open(anvilp);
+                                    BanInv.open(anvilp);
                                 });
                             }
                             click = false;
@@ -293,7 +295,7 @@ public class WhitelistInventory  implements InventoryProvider {
                         })
                         .text(p.getDisplayName())
                         .item(new ItemStack(Material.PAPER))
-                        .title(ChatColor.GOLD+"Whitelist "+ChatColor.GRAY+"|"+ChatColor.RED+" Entfernen")
+                        .title(ChatColor.GOLD+"Ban "+ChatColor.GRAY+"|"+ChatColor.RED+" Entbannen")
                         .plugin(AdminPannel.plugin)
                         .open(p);
             }
@@ -356,55 +358,10 @@ public class WhitelistInventory  implements InventoryProvider {
         return ClickItem;
     }
 
-    private ClickableItem WhitelistStatus() {
-        ItemStack item = new ItemStack(Material.GRAY_DYE);
-        ItemMeta itemMeta = item.getItemMeta();
-        ArrayList<String> lore = new ArrayList<>();
-        itemMeta.setDisplayName(ChatColor.RED+"Whitelist");
-        lore.add(ChatColor.GRAY+"Klicken um die Whitelist");
-        lore.add(ChatColor.GRAY+"zu Aktivieren!");
-        if (Bukkit.hasWhitelist()) {
-            item = new ItemStack(Material.LIME_DYE);
-            itemMeta.setDisplayName(ChatColor.GREEN+"Whitelist");
-            lore.set(1, ChatColor.GRAY+"zu Deaktivieren!");
-        }
-        itemMeta.setLore(lore);
-        item.setItemMeta(itemMeta);
-        ClickableItem ClickItem = ClickableItem.of(item, e -> {
-            Player p = (Player) e.getWhoClicked();
-            if (!Bukkit.hasWhitelist()) {
-                Bukkit.setWhitelist(true);
-            } else {
-                Bukkit.setWhitelist(false);
-            }
-            Bukkit.reloadWhitelist();
-            open(p, TempPage);
-        });
-        return ClickItem;
-    }
-
-    private ClickableItem Reload() {
-        ItemStack item = new ItemStack(Material.PAPER);
-        ItemMeta itemMeta = item.getItemMeta();
-        itemMeta.setDisplayName(ChatColor.LIGHT_PURPLE+"Reload");
-        itemMeta.setCustomModelData(9901808);
-        ArrayList<String> lore = new ArrayList<>();
-        lore.add(ChatColor.GRAY+"Klicken um die Whitelist");
-        lore.add(ChatColor.GRAY+"zu Reloaden!");
-        itemMeta.setLore(lore);
-        item.setItemMeta(itemMeta);
-        ClickableItem ClickItem = ClickableItem.of(item, e -> {
-            Player p = (Player) e.getWhoClicked();
-            Bukkit.reloadWhitelist();
-            open(p, TempPage);
-        });
-        return ClickItem;
-    }
-
     private ClickableItem SkullRemove(OfflinePlayer p) {
         ArrayList<String> lore = new ArrayList<>();
         lore.add(ChatColor.GOLD+"Links Klick"+ChatColor.GRAY+":");
-        lore.add(ChatColor.GRAY+"╰» "+ChatColor.BLUE+"Entfernen");
+        lore.add(ChatColor.GRAY+"╰» "+ChatColor.BLUE+"Entbannen");
         ClickableItem ClickItem = ClickableItem.of(getSkullOffline(p, ChatColor.RED+p.getName(), lore), e -> {
             Remove((Player) e.getWhoClicked(), p);
         });
@@ -417,7 +374,7 @@ public class WhitelistInventory  implements InventoryProvider {
         itemMeta.setDisplayName(ChatColor.RED+p.getName());
         ArrayList<String> lore = new ArrayList<>();
         lore.add(ChatColor.GOLD+"Links Klick"+ChatColor.GRAY+":");
-        lore.add(ChatColor.GRAY+"╰» "+ChatColor.BLUE+"Entfernen");
+        lore.add(ChatColor.GRAY+"╰» "+ChatColor.BLUE+"Entbannen");
         itemMeta.setLore(lore);
         item.setItemMeta(itemMeta);
         ClickableItem ClickItem = ClickableItem.of(item, e -> {
@@ -430,7 +387,7 @@ public class WhitelistInventory  implements InventoryProvider {
         SmartInventory removeConfirm = SmartInventory.builder()
                 .manager(AdminPannel.SmartInvsMan)
                 .size(1, 9)
-                .title(ChatColor.RED+"Entfernen "+ChatColor.GRAY+"| "+ChatColor.AQUA+p.getName())
+                .title(ChatColor.RED+"Entbannen "+ChatColor.GRAY+"| "+ChatColor.AQUA+p.getName())
                 .provider((p1, inventoryContents) -> {
                     ItemStack Nix = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
                     ItemMeta NixMeta = Nix.getItemMeta();
@@ -444,15 +401,15 @@ public class WhitelistInventory  implements InventoryProvider {
                     ConfirmMeta.setCustomModelData(9901804);
                     Confirm.setItemMeta(ConfirmMeta);
                     inventoryContents.set(0, 2, ClickableItem.of(Confirm, e2 -> {
-                        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "whitelist remove "+p.getName());
+                        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "pardon "+p.getName());
                         Bukkit.reloadWhitelist();
-                        e2.getWhoClicked().sendMessage(AdminPannel.prefix+ChatColor.YELLOW+"Spieler "+ChatColor.AQUA+p.getName()+ChatColor.YELLOW+" wurde von der Whitelist entfernt!");
-                        WhitelistInv.open((Player) e2.getWhoClicked());
+                        e2.getWhoClicked().sendMessage(AdminPannel.prefix+ChatColor.YELLOW+"Spieler "+ChatColor.AQUA+p.getName()+ChatColor.YELLOW+" wurde entbannt!");
+                        BanInv.open((Player) e2.getWhoClicked());
                     }));
                     //####
                     ArrayList<String> lore2 = new ArrayList<>();
                     lore2.add(ChatColor.GOLD+"Wirklich den Spieler");
-                    lore2.add(ChatColor.AQUA+p.getName()+ChatColor.RED+" Entfernen"+ChatColor.GOLD+"?");
+                    lore2.add(ChatColor.AQUA+p.getName()+ChatColor.RED+" Entbannen"+ChatColor.GOLD+"?");
                     inventoryContents.set(0, 4, ClickableItem.empty(getSkullOffline(p, ChatColor.AQUA+p.getName(), lore2)));
                     //####
                     ItemStack Cancel = new ItemStack(Material.PAPER);
@@ -461,7 +418,7 @@ public class WhitelistInventory  implements InventoryProvider {
                     CancelMeta.setCustomModelData(9901805);
                     Cancel.setItemMeta(CancelMeta);
                     inventoryContents.set(0, 6, ClickableItem.of(Cancel, e2 -> {
-                        WhitelistInv.open((Player) e2.getWhoClicked());
+                        BanInv.open((Player) e2.getWhoClicked());
                     }));
                     //####
 
@@ -474,7 +431,7 @@ public class WhitelistInventory  implements InventoryProvider {
         SmartInventory addConfirm = SmartInventory.builder()
                 .manager(AdminPannel.SmartInvsMan)
                 .size(1, 9)
-                .title(ChatColor.RED+"Entfernen "+ChatColor.GRAY+"| "+ChatColor.AQUA+p.getName())
+                .title(ChatColor.RED+"Entbannen "+ChatColor.GRAY+"| "+ChatColor.AQUA+p.getName())
                 .provider((p1, inventoryContents) -> {
                     ItemStack Nix = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
                     ItemMeta NixMeta = Nix.getItemMeta();
@@ -488,15 +445,15 @@ public class WhitelistInventory  implements InventoryProvider {
                     ConfirmMeta.setCustomModelData(9901804);
                     Confirm.setItemMeta(ConfirmMeta);
                     inventoryContents.set(0, 2, ClickableItem.of(Confirm, e2 -> {
-                        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "whitelist add "+p.getName());
+                        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "ban "+p.getName());
                         Bukkit.reloadWhitelist();
-                        e2.getWhoClicked().sendMessage(AdminPannel.prefix+ChatColor.YELLOW+"Spieler "+ChatColor.AQUA+p.getName()+ChatColor.YELLOW+" wurde der Whitelist hinzugefügt!");
-                        WhitelistInv.open((Player) e2.getWhoClicked());
+                        e2.getWhoClicked().sendMessage(AdminPannel.prefix+ChatColor.YELLOW+"Spieler "+ChatColor.AQUA+p.getName()+ChatColor.YELLOW+" wurde gebannt!");
+                        BanInv.open((Player) e2.getWhoClicked());
                     }));
                     //####
                     ArrayList<String> lore2 = new ArrayList<>();
                     lore2.add(ChatColor.GOLD+"Wirklich den Spieler");
-                    lore2.add(ChatColor.AQUA+p.getName()+ChatColor.GREEN+" Hinzufügen"+ChatColor.GOLD+"?");
+                    lore2.add(ChatColor.AQUA+p.getName()+ChatColor.GREEN+" Bannen"+ChatColor.GOLD+"?");
                     inventoryContents.set(0, 4, ClickableItem.empty(getSkullOffline(p, ChatColor.AQUA+p.getName(), lore2)));
                     //####
                     ItemStack Cancel = new ItemStack(Material.PAPER);
@@ -505,7 +462,7 @@ public class WhitelistInventory  implements InventoryProvider {
                     CancelMeta.setCustomModelData(9901805);
                     Cancel.setItemMeta(CancelMeta);
                     inventoryContents.set(0, 6, ClickableItem.of(Cancel, e2 -> {
-                        WhitelistInv.open((Player) e2.getWhoClicked());
+                        BanInv.open((Player) e2.getWhoClicked());
                     }));
                     //####
 

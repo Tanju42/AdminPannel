@@ -23,7 +23,7 @@ public class Commands implements CommandExecutor {
                 } else if (args[0].equals("gamerules")) {
                     GameRulesInventory.open(p);
                 } else if (args[0].equals("sounds")) {
-                    SoundsInventory.open(p, 0);
+                    SoundsInventory.open(p, 0, 1, 1);
                 }
             } else if (args.length == 2) {
 

@@ -24,17 +24,17 @@ public class SoundsInventory implements InventoryProvider {
     private static ArrayList<Sound> PlayingSounds = new ArrayList<Sound>();
     private static Pagination pagination = null;
 
-    private double volume = 1.0;
-    private double pitch = 1.0;
+    private static double volume = 1.0;
+    private static double pitch = 1.0;
 
-    private static SmartInventory SoundsInv = SmartInventory.builder().
+    public static SmartInventory SoundsInv = SmartInventory.builder().
             id("SoundsInv")
             .provider(new SoundsInventory())
             .title(ChatColor.GOLD+"Sounds "+ChatColor.GRAY+"| "+ChatColor.AQUA+"0")
             .size(6,9)
             .build();
 
-    public static void open(Player p, Integer Page) {
+    public static void open(Player p, Integer Page, double vol, double pit) {
         if (pagination != null) {
             SoundsInv = SmartInventory.builder().
                     id("SoundsInv")
@@ -43,6 +43,8 @@ public class SoundsInventory implements InventoryProvider {
                     .size(6,9)
                     .build();
         }
+        volume = vol;
+        pitch = pit;
         SoundsInv.open(p, Page);
     }
 
@@ -52,22 +54,24 @@ public class SoundsInventory implements InventoryProvider {
         }
         Integer currPage = pagination.getPage();
         //##################################################
-        ItemStack Nix = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+        ItemStack Nix = new ItemStack(Material.RED_STAINED_GLASS_PANE);
         ItemMeta NixMeta = Nix.getItemMeta();
         NixMeta.setDisplayName(" ");
         Nix.setItemMeta(NixMeta);
         //##################################################
-        ItemStack Previous = new ItemStack(Material.ARROW);
+        ItemStack Previous = new ItemStack(Material.PAPER);
         ItemMeta PreviousMeta = Nix.getItemMeta();
         PreviousMeta.setDisplayName(ChatColor.DARK_AQUA+"Previous");
+        PreviousMeta.setCustomModelData(9901807);
         ArrayList<String> Backlore = new ArrayList<>();
         Backlore.add(ChatColor.GOLD+"Rechts Klick"+ChatColor.GRAY+": "+ChatColor.DARK_AQUA+"First");
         PreviousMeta.setLore(Backlore);
         Previous.setItemMeta(PreviousMeta);
         //##################################################
-        ItemStack Next = new ItemStack(Material.ARROW);
+        ItemStack Next = new ItemStack(Material.PAPER);
         ItemMeta NextMeta = Nix.getItemMeta();
         NextMeta.setDisplayName(ChatColor.DARK_AQUA+"Next");
+        NextMeta.setCustomModelData(9901806);
         ArrayList<String> Nextlore = new ArrayList<>();
         Nextlore.add(ChatColor.GOLD+"Rechts Klick"+ChatColor.GRAY+": "+ChatColor.DARK_AQUA+"Last");
         NextMeta.setLore(Nextlore);
@@ -75,14 +79,14 @@ public class SoundsInventory implements InventoryProvider {
         //##################################################
         contents.fillRow(5, ClickableItem.empty(Nix));
         contents.set(5, 1, Volume(p, pagination.getPage()));
-        contents.set(5, 2, Stop(p, pagination.getPage()));
+        contents.set(5, 2, Stop(p));
 
         if (pagination.getPage() != 0) {
             contents.set(5, 3, ClickableItem.of(Previous, e -> {
                 if (e.isLeftClick()) {
-                    open(p, pagination.previous().getPage());
+                    open(p, pagination.previous().getPage(), volume, pitch);
                 } else if (e.isRightClick()) {
-                    open(p, pagination.first().getPage());
+                    open(p, pagination.first().getPage(), volume, pitch);
                 }
             }));
         } else {
@@ -90,9 +94,9 @@ public class SoundsInventory implements InventoryProvider {
                 if (e.isLeftClick()) {
                     pagination.last();
                     pagination.previous();
-                    open(p, (pagination.getPage()));
+                    open(p, (pagination.getPage()), volume, pitch);
                 } else if (e.isRightClick()) {
-                    open(p, pagination.first().getPage());
+                    open(p, pagination.first().getPage(), volume, pitch);
                 }
             }));
         }
@@ -100,21 +104,21 @@ public class SoundsInventory implements InventoryProvider {
         if (pagination.getPage() != 17) {
             contents.set(5, 5, ClickableItem.of(Next, e -> {
                 if (e.isLeftClick()) {
-                    open(p, pagination.next().getPage());
+                    open(p, pagination.next().getPage(), volume, pitch);
                 } else if (e.isRightClick()) {
                     pagination.last();
                     pagination.previous();
-                    open(p, (pagination.getPage()));
+                    open(p, (pagination.getPage()), volume, pitch);
                 }
             }));
         } else {
             contents.set(5, 5, ClickableItem.of(Next, e -> {
                 if (e.isLeftClick()) {
-                    open(p, pagination.first().getPage());
+                    open(p, pagination.first().getPage(), volume, pitch);
                 } else if (e.isRightClick()) {
                     pagination.last();
                     pagination.previous();
-                    open(p, (pagination.getPage()));
+                    open(p, (pagination.getPage()), volume, pitch);
                 }
             }));
         }
@@ -160,12 +164,6 @@ public class SoundsInventory implements InventoryProvider {
         ItemStack item = new ItemStack(Material.IRON_DOOR);
         ItemMeta itemMeta = item.getItemMeta();
         itemMeta.setDisplayName(ChatColor.DARK_PURPLE+"Zurück");
-        ArrayList<String> lore = new ArrayList<>();
-        lore.add(ChatColor.GOLD+"Links Klick"+ChatColor.GRAY+":");
-        lore.add(ChatColor.GRAY+"╰» "+ChatColor.BLUE+"Zurück");
-        lore.add(ChatColor.GOLD+"Rechts Klick"+ChatColor.GRAY+":");
-        lore.add(ChatColor.GRAY+"╰» "+ChatColor.BLUE+"Schließen");
-        itemMeta.setLore(lore);
         item.setItemMeta(itemMeta);
         ClickableItem ClickItem = ClickableItem.of(item, e -> {
             Player p = (Player) e.getWhoClicked();
@@ -178,7 +176,7 @@ public class SoundsInventory implements InventoryProvider {
         return ClickItem;
     }
 
-    public ClickableItem Stop(Player p, Integer Page) {
+    public ClickableItem Stop(Player p) {
         ItemStack item = new ItemStack(Material.BARRIER);
         ItemMeta itemMeta = item.getItemMeta();
         itemMeta.setDisplayName(ChatColor.RED+"Stop");
@@ -197,9 +195,10 @@ public class SoundsInventory implements InventoryProvider {
     }
 
     public ClickableItem Reset(Player p, Integer Page) {
-        ItemStack item = new ItemStack(Material.PINK_DYE);
+        ItemStack item = new ItemStack(Material.PAPER);
         ItemMeta itemMeta = item.getItemMeta();
         itemMeta.setDisplayName(ChatColor.LIGHT_PURPLE+"Reset");
+        itemMeta.setCustomModelData(9901809);
         ArrayList<String> lore = new ArrayList<>();
         lore.add(ChatColor.GRAY+"Klicken um Lautstärke");
         lore.add(ChatColor.GRAY+"und Pitch zu Reseten!");
@@ -214,9 +213,10 @@ public class SoundsInventory implements InventoryProvider {
     }
 
     public ClickableItem Volume(Player p, Integer Page) {
-        ItemStack item = new ItemStack(Material.CHORUS_FRUIT);
+        ItemStack item = new ItemStack(Material.PAPER);
         ItemMeta itemMeta = item.getItemMeta();
         itemMeta.setDisplayName(ChatColor.GREEN+"Lautstärke");
+        itemMeta.setCustomModelData(9903901);
         ArrayList<String> lore = new ArrayList<>();
         lore.add(ChatColor.YELLOW+"Current"+ChatColor.GRAY+": "+ChatColor.GOLD+volume);
         lore.add(ChatColor.GOLD+"Links Klick"+ChatColor.GRAY+": "+ChatColor.BLUE+"+ 1");
@@ -259,9 +259,10 @@ public class SoundsInventory implements InventoryProvider {
     }
 
     public ClickableItem Pitch(Player p, Integer Page) {
-        ItemStack item = new ItemStack(Material.CHORUS_FRUIT);
+        ItemStack item = new ItemStack(Material.PAPER);
         ItemMeta itemMeta = item.getItemMeta();
         itemMeta.setDisplayName(ChatColor.GREEN+"Pitch");
+        itemMeta.setCustomModelData(9903902);
         ArrayList<String> lore = new ArrayList<>();
         lore.add(ChatColor.YELLOW+"Current"+ChatColor.GRAY+": "+ChatColor.GOLD+pitch);
         lore.add(ChatColor.GOLD+"Links Klick"+ChatColor.GRAY+": "+ChatColor.BLUE+"+ 1");

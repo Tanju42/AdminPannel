@@ -36,9 +36,6 @@ public class AdminPannel extends JavaPlugin {
         createLanguageFiles();
         loadConfigs();
         getLogger().info(ChatColor.GREEN+"Plugin Enabled!");
-        getLogger().info(ChatColor.AQUA+"Daylight_Cycle: "+Bukkit.getServer().getWorld("world").getGameRuleValue(GameRule.DO_DAYLIGHT_CYCLE)+" Type: "+GameRule.RANDOM_TICK_SPEED.getType().toString().contains("Integer"));
-        Bukkit.getServer().getWorld("world").setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
-        getLogger().info(ChatColor.AQUA+"Daylight_Cycle: "+Bukkit.getServer().getWorld("world").getGameRuleValue(GameRule.DO_DAYLIGHT_CYCLE)+" Type: "+GameRule.DO_DAYLIGHT_CYCLE.getType().toString().contains("Integer"));
     }
 
     private void loadConfigs() {
@@ -48,7 +45,6 @@ public class AdminPannel extends JavaPlugin {
     @Override
     public void onDisable() {
         getLogger().info(ChatColor.RED+"Plugin Disabled!");
-        Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA+"Ich bin die Console");
     }
 
 
@@ -63,7 +59,6 @@ public class AdminPannel extends JavaPlugin {
                 copy(name, getClass().getResourceAsStream("/languages/"+name), plugin.getDataFolder()+"/languages/"+name);
             }
         }
-
     }
 
     public static void copy(String name, InputStream source , String destination) {
@@ -76,7 +71,6 @@ public class AdminPannel extends JavaPlugin {
     }
 
     public static FileConfiguration getLanguage() {
-        FileConfiguration FCfg = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder()+"/languages/"+configs.get(0)));
-        return FCfg;
+        return YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder()+"/languages/"+configs.get(0)));
     }
 }

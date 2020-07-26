@@ -14,18 +14,18 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 
-public class WeatherInventory implements InventoryProvider {
+public class TimeInventory implements InventoryProvider {
     public void update(Player p, InventoryContents contents) {}
 
-    private static SmartInventory WeatherInv = SmartInventory.builder().
-            id("WetterInv")
-            .provider(new WeatherInventory())
-            .title(ChatColor.GOLD+"Wetter")
+    private static SmartInventory TimeInv = SmartInventory.builder().
+            id("ZeitInv")
+            .provider(new TimeInventory())
+            .title(ChatColor.GOLD+"Zeit")
             .size(2,9)
             .build();
 
     public static void open(Player p) {
-        WeatherInv.open(p);
+        TimeInv.open(p);
     }
 
     public void init(Player p, InventoryContents contents) {
@@ -34,6 +34,12 @@ public class WeatherInventory implements InventoryProvider {
         ItemMeta BackgroundMeta = Background.getItemMeta();
         BackgroundMeta.setDisplayName(" ");
         Background.setItemMeta(BackgroundMeta);
+        //##################################################
+        ItemStack time = new ItemStack(Material.CLOCK);
+        ItemMeta timeMeta = time.getItemMeta();
+        timeMeta.setDisplayName(" ");
+        time.setItemMeta(timeMeta);
+        //##################################################
         ItemStack Nix = new ItemStack(Material.RED_STAINED_GLASS_PANE);
         ItemMeta NixMeta = Nix.getItemMeta();
         NixMeta.setDisplayName(" ");
@@ -41,9 +47,11 @@ public class WeatherInventory implements InventoryProvider {
         //##################################################
         contents.fillRow(0, ClickableItem.empty(Background));
         contents.fillRow(1, ClickableItem.empty(Nix));
-        contents.set(0, 3, Types("clear", 9902902));
-        contents.set(0, 4, Types("rain", 9902903));
-        contents.set(0, 5, Types("thunder", 9902904));
+        contents.set(0, 2, Types("day", 9910904));
+        contents.set(0, 3, Types("noon", 9910901));
+        contents.set(0, 4, ClickableItem.empty(time));
+        contents.set(0, 5, Types("night", 9910903));
+        contents.set(0, 6, Types("midnight", 9910902));
         contents.set(1, 2, World(p));
         contents.set(1, 4, Back());
 
@@ -59,7 +67,7 @@ public class WeatherInventory implements InventoryProvider {
             if (e.isLeftClick()) {
                 MainInventory.open(p);
             } else if (e.isRightClick()) {
-                WeatherInv.close(p);
+                TimeInv.close(p);
             }
         });
         return ClickItem;
@@ -71,14 +79,14 @@ public class WeatherInventory implements InventoryProvider {
         itemMeta.setDisplayName(ChatColor.BLUE+Art);
         itemMeta.setCustomModelData(CostumModelData);
         ArrayList<String> lore = new ArrayList<>();
-        lore.add(ChatColor.GRAY+"Klicken um das Wetter auf");
+        lore.add(ChatColor.GRAY+"Klicken um die Zeit auf");
         lore.add(ChatColor.BLUE+Art+ChatColor.GRAY+" zu stellen!");
         itemMeta.setLore(lore);
         item.setItemMeta(itemMeta);
         ClickableItem ClickItem = ClickableItem.of(item, e -> {
             Player p = (Player) e.getWhoClicked();
-            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "weather "+Art);
-            p.sendMessage(AdminPannel.prefix+ChatColor.YELLOW+"Wetter wurde auf "+ChatColor.GREEN+Art+ChatColor.YELLOW+" gestellt!");
+            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "time set "+Art);
+            p.sendMessage(AdminPannel.prefix+ChatColor.YELLOW+"Zeit wurde auf "+ChatColor.GREEN+Art+ChatColor.YELLOW+" gestellt!");
         });
         return ClickItem;
     }

@@ -35,11 +35,21 @@ public class GameRulesInventory implements InventoryProvider {
     }
 
     public void init(Player p, InventoryContents contents) {
-        ItemStack Nix = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+        ItemStack Background = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
+        ItemMeta BackgroundMeta = Background.getItemMeta();
+        BackgroundMeta.setDisplayName(" ");
+        Background.setItemMeta(BackgroundMeta);
+        //##################################################
+        ItemStack Nix = new ItemStack(Material.RED_STAINED_GLASS_PANE);
         ItemMeta NixMeta = Nix.getItemMeta();
         NixMeta.setDisplayName(" ");
         Nix.setItemMeta(NixMeta);
 
+        contents.set(3, 0, ClickableItem.empty(Background));
+        contents.set(3, 1, ClickableItem.empty(Background));
+        contents.set(3, 4, ClickableItem.empty(Background));
+        contents.set(3, 7, ClickableItem.empty(Background));
+        contents.set(3, 8, ClickableItem.empty(Background));
         for ( GameRule rule : GameRule.values()) {
             contents.add(Arten(p, rule, getDescription(rule)));
         }
@@ -54,12 +64,6 @@ public class GameRulesInventory implements InventoryProvider {
         ItemStack item = new ItemStack(Material.IRON_DOOR);
         ItemMeta itemMeta = item.getItemMeta();
         itemMeta.setDisplayName(ChatColor.DARK_PURPLE+"Zurück");
-        ArrayList<String> lore = new ArrayList<>();
-        lore.add(ChatColor.GOLD+"Links Klick"+ChatColor.GRAY+":");
-        lore.add(ChatColor.GRAY+"╰» "+ChatColor.BLUE+"Zurück");
-        lore.add(ChatColor.GOLD+"Rechts Klick"+ChatColor.GRAY+":");
-        lore.add(ChatColor.GRAY+"╰» "+ChatColor.BLUE+"Schließen");
-        itemMeta.setLore(lore);
         item.setItemMeta(itemMeta);
         ClickableItem ClickItem = ClickableItem.of(item, e -> {
             Player p = (Player) e.getWhoClicked();
@@ -73,9 +77,10 @@ public class GameRulesInventory implements InventoryProvider {
     }
 
     public ClickableItem World(Player p) {
-        ItemStack item = new ItemStack(Material.BOOK);
+        ItemStack item = new ItemStack(Material.PAPER);
         ItemMeta itemMeta = item.getItemMeta();
         itemMeta.setDisplayName(ChatColor.BLUE+"Momentane Welt");
+        itemMeta.setCustomModelData(9901801);
         ArrayList<String> lore = new ArrayList<>();
         lore.add(ChatColor.GRAY+p.getWorld().getName());
         itemMeta.setLore(lore);
@@ -85,9 +90,10 @@ public class GameRulesInventory implements InventoryProvider {
     }
 
     public ClickableItem Reset(Player p) {
-        ItemStack item = new ItemStack(Material.PURPLE_DYE);
+        ItemStack item = new ItemStack(Material.PAPER);
         ItemMeta itemMeta = item.getItemMeta();
         itemMeta.setDisplayName(ChatColor.LIGHT_PURPLE+"Reset");
+        itemMeta.setCustomModelData(9901809);
         ArrayList<String> lore = new ArrayList<>();
         lore.add(ChatColor.GRAY+"Klicken um alles auf");
         lore.add(ChatColor.GRAY+"die standard Werte");
