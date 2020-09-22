@@ -9,9 +9,12 @@ import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -22,13 +25,13 @@ import java.util.ArrayList;
 import java.util.function.Consumer;
 
 public class EffectsInventory implements InventoryProvider {
-    public void update(Player p, InventoryContents contents) {}
 
 
     private Integer duration = 10;
     private Integer amplifier = 1;
     private Boolean Particles = true;
     private Player player = null;
+    private int ticks = 0;
 
     private static SmartInventory EffectsInv = SmartInventory.builder().
             id("EffectsInv")
@@ -41,6 +44,14 @@ public class EffectsInventory implements InventoryProvider {
         EffectsInv.open(p);
     }
 
+    public void update(Player p, InventoryContents contents) {
+        if (ticks > 5) {
+            addEffects(contents, p);
+            ticks = 0;
+        }
+        ticks++;
+    }
+
     public void init(Player p, InventoryContents contents) {
         ItemStack Nix = new ItemStack(Material.RED_STAINED_GLASS_PANE);
         ItemMeta NixMeta = Nix.getItemMeta();
@@ -51,7 +62,7 @@ public class EffectsInventory implements InventoryProvider {
             player = p;
         }
         //##################################################
-        addEffects(contents);
+        addEffects(contents, p);
         contents.fillRow(EffectsInv.getRows()-1, ClickableItem.empty(Nix));
         contents.set(EffectsInv.getRows()-1, 0, SelectedPlayerSkull(p));
         Bukkit.getScheduler().runTaskAsynchronously(AdminPannel.plugin, () -> {
@@ -67,43 +78,43 @@ public class EffectsInventory implements InventoryProvider {
 
     }
 
-    private void addEffects(InventoryContents contents) {
+    private void addEffects(InventoryContents contents, Player p) {
         //GOOD
-        contents.set(0,0,Types("Absorption", "absorption", 9901901));
-        contents.set(0,1,Types("Meereskraft", "conduit_power", 9901904));
-        contents.set(0,2,Types("Gunst des Delfins", "dolphins_grace", 9901905));
-        contents.set(0,3,Types("Feuerschutz", "fire_resistance", 9901906));
-        contents.set(0,4,Types("Leuchten", "glowing", 9901907));
-        contents.set(1,0,Types("Eile", "FAST_DIGGING", 9901908));
-        contents.set(1,1,Types("Extraenergie", "health_boost", 9901909));
-        contents.set(1,2,Types("Held des Dorfes", "hero_of_the_village", 9901910));
-        contents.set(1,3,Types("Direktheilung", "HEAL", 9901913));
-        contents.set(1,4,Types("Unsichtbarkeit", "invisibility", 9901914));
-        contents.set(2,0,Types("Sprungkraft", "JUMP", 9901915));
-        contents.set(2,1,Types("Glück", "luck", 9901917));
-        contents.set(2,2,Types("Nachtsicht", "night_vision", 9901920));
-        contents.set(2,3,Types("Regeneration", "regeneration", 9901922));
-        contents.set(2,4,Types("Resistenz", "DAMAGE_RESISTANCE", 9901923));
-        contents.set(3,0,Types("Sättigung", "saturation", 9901924));
-        contents.set(3,1,Types("Sanfter Fall", "slow_falling", 9901925));
-        contents.set(3,2,Types("Schnelligkeit", "speed", 9901927));
-        contents.set(3,3,Types("Stärke", "INCREASE_DAMAGE", 9901928));
-        contents.set(3,4,Types("Unterwasseratem", "water_breathing", 9901930));
+        contents.set(0,0,Types("Absorption", "absorption", 9901901, p));
+        contents.set(0,1,Types("Meereskraft", "conduit_power", 9901904, p));
+        contents.set(0,2,Types("Gunst des Delfins", "dolphins_grace", 9901905, p));
+        contents.set(0,3,Types("Feuerschutz", "fire_resistance", 9901906, p));
+        contents.set(0,4,Types("Leuchten", "glowing", 9901907, p));
+        contents.set(1,0,Types("Eile", "FAST_DIGGING", 9901908, p));
+        contents.set(1,1,Types("Extraenergie", "health_boost", 9901909, p));
+        contents.set(1,2,Types("Held des Dorfes", "hero_of_the_village", 9901910, p));
+        contents.set(1,3,Types("Direktheilung", "HEAL", 9901913, p));
+        contents.set(1,4,Types("Unsichtbarkeit", "invisibility", 9901914, p));
+        contents.set(2,0,Types("Sprungkraft", "JUMP", 9901915, p));
+        contents.set(2,1,Types("Glück", "luck", 9901917, p));
+        contents.set(2,2,Types("Nachtsicht", "night_vision", 9901920, p));
+        contents.set(2,3,Types("Regeneration", "regeneration", 9901922, p));
+        contents.set(2,4,Types("Resistenz", "DAMAGE_RESISTANCE", 9901923, p));
+        contents.set(3,0,Types("Sättigung", "saturation", 9901924, p));
+        contents.set(3,1,Types("Sanfter Fall", "slow_falling", 9901925, p));
+        contents.set(3,2,Types("Schnelligkeit", "speed", 9901927, p));
+        contents.set(3,3,Types("Stärke", "INCREASE_DAMAGE", 9901928, p));
+        contents.set(3,4,Types("Unterwasseratem", "water_breathing", 9901930, p));
         //####
 
         //#BAD
-        contents.set(0,6,Types("Böses Omen", "bad_omen", 9901902));
-        contents.set(0,7,Types("Blindheit", "blindness", 9901903));
-        contents.set(0,8,Types("Hunger", "hunger", 9901911));
-        contents.set(1,6,Types("Direktschaden", "HARM", 9901912));
-        contents.set(1,7,Types("Schwebekraft", "levitation", 9901916));
-        contents.set(1,8,Types("Abbaulähmung", "SLOW_DIGGING", 9901918));
-        contents.set(2,6,Types("Übelkeit", "CONFUSION", 9901919));
-        contents.set(2,7,Types("Vergiftung", "poison", 9901921));
-        contents.set(2,8,Types("Langsamkeit", "SLOW", 9901926));
-        contents.set(3,6,Types("Pech", "unluck", 9901929));
-        contents.set(3,7,Types("Schwäche", "weakness", 9901931));
-        contents.set(3,8,Types("Ausdörrung", "wither", 9901932));
+        contents.set(0,6,Types("Böses Omen", "bad_omen", 9901902, p));
+        contents.set(0,7,Types("Blindheit", "blindness", 9901903, p));
+        contents.set(0,8,Types("Hunger", "hunger", 9901911, p));
+        contents.set(1,6,Types("Direktschaden", "HARM", 9901912, p));
+        contents.set(1,7,Types("Schwebekraft", "levitation", 9901916, p));
+        contents.set(1,8,Types("Abbaulähmung", "SLOW_DIGGING", 9901918, p));
+        contents.set(2,6,Types("Übelkeit", "CONFUSION", 9901919, p));
+        contents.set(2,7,Types("Vergiftung", "poison", 9901921, p));
+        contents.set(2,8,Types("Langsamkeit", "SLOW", 9901926, p));
+        contents.set(3,6,Types("Pech", "unluck", 9901929, p));
+        contents.set(3,7,Types("Schwäche", "weakness", 9901931, p));
+        contents.set(3,8,Types("Ausdörrung", "wither", 9901932, p));
         //####
 
     }
@@ -124,7 +135,7 @@ public class EffectsInventory implements InventoryProvider {
         return ClickItem;
     }
 
-    public ClickableItem Types(String DisplayName, String Art, Integer ModelData) {
+    public ClickableItem Types(String DisplayName, String Art, Integer ModelData, Player p) {
         ItemStack item = new ItemStack(Material.PAPER);
         ItemMeta itemMeta = item.getItemMeta();
         itemMeta.setDisplayName(ChatColor.BLUE+DisplayName);
@@ -133,10 +144,19 @@ public class EffectsInventory implements InventoryProvider {
         lore.add(ChatColor.GOLD+"Links"+ChatColor.GRAY+": "+ChatColor.DARK_PURPLE+"Selber");
         lore.add(ChatColor.GOLD+"Rechts"+ChatColor.GRAY+": "+ChatColor.DARK_PURPLE+player.getDisplayName());
         itemMeta.setLore(lore);
+
+        if (p.getActivePotionEffects().size() != 0) {
+            for (PotionEffect effect : p.getActivePotionEffects()) {
+                if( effect.getType().equals(PotionEffectType.getByName(Art)) ) {
+                    itemMeta.addEnchant(Enchantment.LUCK, 1, true);
+                    itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+                }
+            }
+        }
+
         item.setItemMeta(itemMeta);
         ClickableItem ClickItem = ClickableItem.of(item, e -> {
             if (e.isLeftClick()) {
-                Player p = (Player) e.getWhoClicked();
                 p.addPotionEffect(new PotionEffect(PotionEffectType.getByName(Art), duration * 20, amplifier-1, Particles));
             } else if (e.isRightClick()) {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(Art), duration * 20, amplifier-1, Particles));

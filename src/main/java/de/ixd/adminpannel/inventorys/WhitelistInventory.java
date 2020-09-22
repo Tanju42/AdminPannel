@@ -474,7 +474,7 @@ public class WhitelistInventory  implements InventoryProvider {
         SmartInventory addConfirm = SmartInventory.builder()
                 .manager(AdminPannel.SmartInvsMan)
                 .size(1, 9)
-                .title(ChatColor.RED+"Entfernen "+ChatColor.GRAY+"| "+ChatColor.AQUA+p.getName())
+                .title(ChatColor.GREEN+"Hinzufügen "+ChatColor.GRAY+"| "+ChatColor.AQUA+p.getName())
                 .provider((p1, inventoryContents) -> {
                     ItemStack Nix = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
                     ItemMeta NixMeta = Nix.getItemMeta();

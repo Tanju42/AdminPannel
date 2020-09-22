@@ -14,6 +14,11 @@
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
+        <!-- SmartInvs -->
+        <repository>
+            <id>sytm-nexus</id>
+            <url>https://repo.sytm.de/repository/maven-hosted/</url>
+        </repository>
         <!-- Anvil GUI -->
         <repository>
             <id>jitpack.io</id>
