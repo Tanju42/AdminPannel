@@ -5,9 +5,5 @@
 build
 out
 CopyAndStart.cmd
-/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst
-/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
-/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst
+/target/*
 /Copy.cmd
-/target/AdminPannel-1.0.jar
-/target/antrun/build-main.xml
