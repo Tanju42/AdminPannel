@@ -15,7 +15,7 @@ public class CommandTabComplete implements TabCompleter {
     public List<String> onTabComplete(CommandSender cs, Command command, String s, String[] args) {
         final List<String> completions = new ArrayList<>();
         if (args.length == 1) {
-            final String[] cmds = { "weather", "gamerules", "sounds" };
+            final String[] cmds = { "weather", "gamerules", "sounds", "sup" };
             StringUtil.copyPartialMatches(args[0], Arrays.asList(cmds), completions);
         }
         Collections.sort(completions);

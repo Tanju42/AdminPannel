@@ -1,9 +1,6 @@
 package de.ixd.adminpannel;
 
-import de.ixd.adminpannel.inventorys.GameRulesInventory;
-import de.ixd.adminpannel.inventorys.MainInventory;
-import de.ixd.adminpannel.inventorys.SoundsInventory;
-import de.ixd.adminpannel.inventorys.WeatherInventory;
+import de.ixd.adminpannel.inventorys.*;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -24,6 +21,8 @@ public class Commands implements CommandExecutor {
                     GameRulesInventory.open(p);
                 } else if (args[0].equals("sounds")) {
                     SoundsInventory.open(p, 0, 1, 1);
+                } else if (args[0].equals("sup")) {
+                    SupporterInventory.open(p);
                 }
             } else if (args.length == 2) {
 
